@@ -1,0 +1,104 @@
+% base de conocimiento=
+personaje('Elara',5,100).
+personaje('Kael',3,80).
+personaje('Rin',7,120).
+
+mision(m1,'Bosque de Sombras',2,50).
+mision(m2,'Cueva del Dragon',5,120).
+mision(m3,'Torre Arcana',7,200).
+
+inventario('Elara',[espada,escudo,pocion]).
+inventario('Kael',[arco,flechas]).
+inventario('Rin',[varita,grimorio,pocion,amuleto]).
+
+requiere(m2,escudo).
+requiere(m2,pocion).
+requiere(m3,grimorio).
+requiere(m4,pocion).
+
+% Reglas aritmeticas y recursivas
+%1. Verificacion de nivel (operador relacional >-)
+puede_aceptar(Personaje,ID_Mision):-
+    personaje(Personaje, Nivel,_),
+    mision(ID_Mision,_,Dificultad,_),
+    Nivel>=Dificultad.
+
+%2. Cálculo recursivo de XP acumulado (Patrón factorial de 2.1)
+%Caso base: 0 misiones = 0xp
+xp_acumulada(0,0).
+%Paso recursivo: XP(N)-XP(N-1)+(20*N)
+xp_acumulada(N,Total):-
+    N>0,
+    N1 is N-1,
+    xp_acumulada(N1,Prev),
+    Total is Prev +(30*N).
+
+%3 Verificacion de inventario con member/2
+tiene_requerido(Personaje,Objeto):-
+    inventario(Personaje,lista),
+    member(Objeto,lista).
+
+% -- Reglas de unificacion y comparacion--
+%1-Detectar personajes del mismo nivel exacto (vs unificacion)
+mismo_nivel(P1,P2):-
+    personaje(P1,N,:),
+    personaje(P2,N,_),
+    P1\==P2.
+
+%2. Validar Balance aritemtico estricto
+es_balanceado(Personaje):-
+    personaje(Personaje,_,Vida),
+    Vida =:= 100.
+
+%3. Ejemplo controlado de error
+
+
+%--Procesamiento de listas y NLP
+
+%1.Fusionar inventarios de dos personajes usando append/3(2.3)
+fusionar_equipo(P1,P2,EquipoFusionado):-
+    inventario(P1,L1),
+    inventario(P2,L2),
+    append(L1,L2,EquipoFusionado).
+
+%2. Base de conjugacion (adaptacion directa de conjugar_verbo\5 en 2.3)
+tiempo(presente).
+tiempo(pasado).
+tiempo(futuro).
+persona(primera).
+persona(segunda).
+persona(tercera).
+numero(singular).
+numero(plural).
+
+ser(presente,tercera,singular,"es").
+ser(pasado,tercera,singular,"fue").
+ser(futuro,tercera,singular,"será").
+ser(presente,primera,singular,"soy").
+ser(presente,primera,plural,"somos").
+
+%3. Regla de inferencia con estrucura condicional(2.3)
+conjugar_accion(Verbo,Tiempo,Persona,Numero,Conjugacion):-
+    tiempo(Tiempo),persona(Persona),numero(Numero),
+    (Verbo="ser"
+    ->  ser(Tiempo,Persona,Numero,R),
+        Conjugacion=R
+    ;   Conjugacion=Verbo
+    ).
+
+%4. Generacion de reporte narrativo
+generar_reporte(Personaje,MisionID,Mensaje):-
+    puede_aceptar(Personaje,MisionID),
+    mision(MisionID,Nombre,_,XP),
+    conjugar_accion("ser",presente,tercera,singular,FormaVerbal),
+    atomic_list_concat([Personaje,FormaVerbal,"capaz de completar",Nombre,"por",XP,"XP"],Mensaje).
+
+
+%Consultas Validacion Final
+
+
+
+
+%recibir uno o varios jugadores, conjugacion de primera persona del plural. tercera persona en pluralnode
+
+%entre los 2 llegan a x nivel de xp
